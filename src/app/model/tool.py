@@ -1,9 +1,6 @@
 import json
-from dateutil import parser
 from typing import Union, List, Dict
 from datetime import datetime, timedelta, timezone
-from asyncpg import Record
-from asyncpg.exceptions import UniqueViolationError
 from ..schema import exchange_rate as schema
 from ..schema.base import ApiException
 from .config import get_settings
@@ -24,6 +21,10 @@ class ToolModel():
             elif change_info.amount.__contains__('$') is False:
                 raise Exception('amountet 值格式錯誤')
             amount = float(change_info.amount[1:].replace(',', ''))
+            if amount > 100000000:
+                raise Exception('amount 數值過大')
+            elif amount < 0:
+                raise Exception('amount 數值為負數')
         except Exception as e:
             raise ApiException(code=404,
                                 msg="匯率轉換發生非預期錯誤",
@@ -50,7 +51,7 @@ class ToolModel():
             amount = f'${amount}.{float_point}'
             return schema.changed_data(amount=amount)
         except Exception as e:
-            raise ApiException(code=500,
+            raise ApiException(code=404,
                                 msg="匯率轉換發生非預期錯誤",
                                 detail={
                                     "payload": change_info,

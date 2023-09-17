@@ -42,3 +42,7 @@ def test_current_exchanger_rate_bad_query():
     assert response.status_code == 404
     response = client.get("/api/v1/current-exchanger-rate/change?source=USD&target=JPY&amount=1,525")
     assert response.status_code == 404
+    response = client.get("/api/v1/current-exchanger-rate/change?source=USD&target=JPY&amount=$1000000000000000")
+    assert response.status_code == 404
+    response = client.get("/api/v1/current-exchanger-rate/change?source=USD&target=JPY&amount=$-1")
+    assert response.status_code == 404
